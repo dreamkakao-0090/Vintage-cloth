@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제주도 지도</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Malgun Gothic', sans-serif; }
+    #map { width: 100vw; height: 100vh; }
+    .legend {
+      position: absolute;
+      bottom: 30px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 14px 18px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 13px;
+      line-height: 2;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      display: inline-block; flex-shrink: 0;
+    }
+    .legend-line {
+      width: 24px; height: 3px;
+      display: inline-block; flex-shrink: 0;
+    }
+    .legend-title { font-weight: bold; margin-bottom: 6px; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div class="legend">
+  <div class="legend-title">📍 주요 장소</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#e74c3c"></span> 제주국제공항</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#2980b9"></span> 제주도청</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#27ae60"></span> 제주대학교</div>
+  <div style="margin-top:8px; font-weight:bold; font-size:14px;">📏 직선 거리</div>
+  <div class="legend-item"><span class="legend-line" style="background:#e67e22"></span> 공항 ↔ 도청</div>
+  <div class="legend-item"><span class="legend-line" style="background:#8e44ad"></span> 공항 ↔ 대학교</div>
+  <div class="legend-item"><span class="legend-line" style="background:#16a085"></span> 도청 ↔ 대학교</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([33.3846, 126.5534], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  }).addTo(map);
+
+  const places = {
+    airport:     { latlng: [33.5070, 126.4930], label: '제주국제공항', color: '#e74c3c', emoji: '✈️' },
+    government:  { latlng: [33.4890, 126.4983], label: '제주도청',    color: '#2980b9', emoji: '🏛️' },
+    university:  { latlng: [33.4507, 126.5707], label: '제주대학교',  color: '#27ae60', emoji: '🎓' }
+  };
+
+  function makeIcon(color, emoji) {
+    return L.divIcon({
+      className: '',
+      html: `
+        <div style="
+          background:${color};
+          color:white;
+          border-radius:50% 50% 50% 0;
+          transform:rotate(-45deg);
+          width:36px; height:36px;
+          display:flex; align-items:center; justify-content:center;
+          box-shadow:0 2px 6px rgba(0,0,0,0.4);
+          border:2px solid white;
+        ">
+          <span style="transform:rotate(45deg); font-size:16px;">${emoji}</span>
+        </div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -38]
+    });
+  }
+
+  function haversineKm(a, b) {
+    const R = 6371;
+    const dLat = (b[0] - a[0]) * Math.PI / 180;
+    const dLon = (b[1] - a[1]) * Math.PI / 180;
+    const sin2 = Math.sin(dLat/2)**2 +
+                 Math.cos(a[0]*Math.PI/180) * Math.cos(b[0]*Math.PI/180) *
+                 Math.sin(dLon/2)**2;
+    return (R * 2 * Math.asin(Math.sqrt(sin2))).toFixed(2);
+  }
+
+  // 마커 추가
+  Object.values(places).forEach(p => {
+    L.marker(p.latlng, { icon: makeIcon(p.color, p.emoji) })
+      .addTo(map)
+      .bindPopup(`<b>${p.label}</b><br>${p.latlng[0].toFixed(4)}°N, ${p.latlng[1].toFixed(4)}°E`, { maxWidth: 200 });
+  });
+
+  // 직선 + 거리 라벨
+  const lines = [
+    { from: 'airport', to: 'government', color: '#e67e22' },
+    { from: 'airport', to: 'university', color: '#8e44ad' },
+    { from: 'government', to: 'university', color: '#16a085' }
+  ];
+
+  lines.forEach(({ from, to, color }) => {
+    const a = places[from].latlng;
+    const b = places[to].latlng;
+    const km = haversineKm(a, b);
+
+    L.polyline([a, b], {
+      color,
+      weight: 2.5,
+      dashArray: '8 5',
+      opacity: 0.85
+    }).addTo(map);
+
+    // 중간 지점에 거리 라벨
+    const mid = [(a[0]+b[0])/2, (a[1]+b[1])/2];
+    L.marker(mid, {
+      icon: L.divIcon({
+        className: '',
+        html: `<div style="
+          background:${color};
+          color:white;
+          padding:3px 7px;
+          border-radius:12px;
+          font-size:11px;
+          font-weight:bold;
+          white-space:nowrap;
+          box-shadow:0 1px 4px rgba(0,0,0,0.3);
+        ">${km} km</div>`,
+        iconAnchor: [25, 10]
+      }),
+      interactive: false
+    }).addTo(map);
+  });
+</script>
+</body>
+</html>
