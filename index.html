@@ -1,144 +1,446 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>제주도 지도</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RETRO JEJU — 제주 중앙로 빈티지샵</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#F5F0E8',
+            rust:  '#C4622D',
+            olive: '#6B7C4A',
+            charcoal: '#2C2C2C',
+            sand: '#E8DCC8',
+          },
+          fontFamily: {
+            serif: ['"Noto Serif KR"', 'Georgia', 'serif'],
+            sans:  ['"Noto Sans KR"', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Malgun Gothic', sans-serif; }
-    #map { width: 100vw; height: 100vh; }
-    .legend {
+    html { scroll-behavior: smooth; }
+    .grain::after {
+      content: '';
       position: absolute;
-      bottom: 30px;
-      right: 10px;
-      z-index: 1000;
-      background: white;
-      padding: 14px 18px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      font-size: 13px;
-      line-height: 2;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
     }
-    .legend-item { display: flex; align-items: center; gap: 8px; }
-    .legend-dot {
-      width: 12px; height: 12px; border-radius: 50%;
-      display: inline-block; flex-shrink: 0;
+    .tag-badge {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
     }
-    .legend-line {
-      width: 24px; height: 3px;
-      display: inline-block; flex-shrink: 0;
-    }
-    .legend-title { font-weight: bold; margin-bottom: 6px; font-size: 14px; }
   </style>
 </head>
-<body>
-<div id="map"></div>
-<div class="legend">
-  <div class="legend-title">📍 주요 장소</div>
-  <div class="legend-item"><span class="legend-dot" style="background:#e74c3c"></span> 제주국제공항</div>
-  <div class="legend-item"><span class="legend-dot" style="background:#2980b9"></span> 제주도청</div>
-  <div class="legend-item"><span class="legend-dot" style="background:#27ae60"></span> 제주대학교</div>
-  <div style="margin-top:8px; font-weight:bold; font-size:14px;">📏 직선 거리</div>
-  <div class="legend-item"><span class="legend-line" style="background:#e67e22"></span> 공항 ↔ 도청</div>
-  <div class="legend-item"><span class="legend-line" style="background:#8e44ad"></span> 공항 ↔ 대학교</div>
-  <div class="legend-item"><span class="legend-line" style="background:#16a085"></span> 도청 ↔ 대학교</div>
-</div>
+<body class="bg-cream font-sans text-charcoal">
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  const map = L.map('map').setView([33.3846, 126.5534], 11);
+  <!-- NAV -->
+  <nav class="fixed top-0 w-full z-50 bg-cream/90 backdrop-blur border-b border-sand">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="font-serif text-xl font-bold tracking-widest text-charcoal">
+        RETRO<span class="text-rust">JEJU</span>
+      </a>
+      <ul class="hidden md:flex gap-8 text-sm font-medium tracking-wide">
+        <li><a href="#about"    class="hover:text-rust transition-colors">스토리</a></li>
+        <li><a href="#items"    class="hover:text-rust transition-colors">컬렉션</a></li>
+        <li><a href="#location" class="hover:text-rust transition-colors">오시는 길</a></li>
+        <li><a href="#contact"  class="hover:text-rust transition-colors">문의</a></li>
+      </ul>
+      <a href="#contact" class="text-xs bg-rust text-white px-4 py-2 rounded-full hover:bg-charcoal transition-colors tracking-wider">
+        방문 예약
+      </a>
+    </div>
+  </nav>
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18
-  }).addTo(map);
+  <!-- HERO -->
+  <section class="relative min-h-screen flex items-center grain overflow-hidden pt-16">
+    <div class="absolute inset-0">
+      <img
+        src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&auto=format&fit=crop&q=80"
+        alt="빈티지 의류 가게 내부"
+        class="w-full h-full object-cover opacity-30"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-cream via-cream/80 to-transparent"></div>
+    </div>
+    <div class="relative max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <p class="text-rust text-sm tracking-[0.3em] font-medium mb-4 uppercase">Since 2019 · 제주 중앙로</p>
+        <h1 class="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6">
+          시간이<br/>
+          <span class="text-rust">머문</span><br/>
+          옷장
+        </h1>
+        <p class="text-lg text-charcoal/70 leading-relaxed mb-8 max-w-md">
+          제주 중앙로 골목 속, 세월의 향기가 담긴 빈티지 의류를 만나보세요.
+          1970–90년대 엄선된 데드스톡과 빈티지 피스를 소개합니다.
+        </p>
+        <div class="flex gap-4 flex-wrap">
+          <a href="#items" class="bg-rust text-white px-8 py-3 rounded-full font-medium hover:bg-charcoal transition-colors">
+            컬렉션 보기
+          </a>
+          <a href="#location" class="border border-charcoal text-charcoal px-8 py-3 rounded-full font-medium hover:bg-charcoal hover:text-white transition-colors">
+            찾아오기
+          </a>
+        </div>
+      </div>
+      <!-- 우측 이미지 카드 -->
+      <div class="hidden md:flex justify-end gap-4">
+        <div class="flex flex-col gap-4 mt-12">
+          <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&auto=format&fit=crop&q=80"
+               alt="빈티지 의류" class="w-40 h-56 object-cover rounded-lg shadow-lg" />
+          <img src="https://images.unsplash.com/photo-1519735777090-ec97162dc266?w=300&auto=format&fit=crop&q=80"
+               alt="빈티지 액세서리" class="w-40 h-40 object-cover rounded-lg shadow-lg" />
+        </div>
+        <div class="flex flex-col gap-4">
+          <img src="https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=300&auto=format&fit=crop&q=80"
+               alt="행거에 걸린 옷" class="w-40 h-44 object-cover rounded-lg shadow-lg" />
+          <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=300&auto=format&fit=crop&q=80"
+               alt="빈티지 스타일" class="w-40 h-52 object-cover rounded-lg shadow-lg" />
+        </div>
+      </div>
+    </div>
+    <!-- 스크롤 힌트 -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-charcoal/40">
+      <span class="text-xs tracking-widest">SCROLL</span>
+      <div class="w-px h-10 bg-charcoal/20 animate-pulse"></div>
+    </div>
+  </section>
 
-  const places = {
-    airport:     { latlng: [33.5070, 126.4930], label: '제주국제공항', color: '#e74c3c', emoji: '✈️' },
-    government:  { latlng: [33.4890, 126.4983], label: '제주도청',    color: '#2980b9', emoji: '🏛️' },
-    university:  { latlng: [33.4507, 126.5707], label: '제주대학교',  color: '#27ae60', emoji: '🎓' }
-  };
+  <!-- MARQUEE STRIP -->
+  <div class="bg-rust text-white py-3 overflow-hidden">
+    <div class="flex gap-12 whitespace-nowrap animate-[marquee_18s_linear_infinite]" style="animation:marquee 18s linear infinite">
+      <span class="text-sm tracking-widest font-medium" style="white-space:nowrap">
+        ✦ VINTAGE &nbsp;·&nbsp; DEADSTOCK &nbsp;·&nbsp; 제주 중앙로 &nbsp;·&nbsp; 1970s–90s &nbsp;·&nbsp; CURATED PIECES &nbsp;·&nbsp; RETRO JEJU &nbsp;·&nbsp; VINTAGE &nbsp;·&nbsp; DEADSTOCK &nbsp;·&nbsp; 제주 중앙로 &nbsp;·&nbsp; 1970s–90s &nbsp;·&nbsp; CURATED PIECES &nbsp;·&nbsp; RETRO JEJU &nbsp;·&nbsp; VINTAGE &nbsp;·&nbsp; DEADSTOCK &nbsp;·&nbsp; 제주 중앙로 &nbsp;·&nbsp; 1970s–90s &nbsp;·&nbsp; CURATED PIECES &nbsp;·&nbsp; RETRO JEJU
+      </span>
+    </div>
+  </div>
+  <style>
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+  </style>
 
-  function makeIcon(color, emoji) {
-    return L.divIcon({
-      className: '',
-      html: `
-        <div style="
-          background:${color};
-          color:white;
-          border-radius:50% 50% 50% 0;
-          transform:rotate(-45deg);
-          width:36px; height:36px;
-          display:flex; align-items:center; justify-content:center;
-          box-shadow:0 2px 6px rgba(0,0,0,0.4);
-          border:2px solid white;
-        ">
-          <span style="transform:rotate(45deg); font-size:16px;">${emoji}</span>
-        </div>`,
-      iconSize: [36, 36],
-      iconAnchor: [18, 36],
-      popupAnchor: [0, -38]
-    });
-  }
+  <!-- ABOUT -->
+  <section id="about" class="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
+    <div class="relative">
+      <img src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=700&auto=format&fit=crop&q=80"
+           alt="빈티지 샵 내부" class="w-full h-[480px] object-cover rounded-2xl shadow-xl" />
+      <!-- 뱃지 -->
+      <div class="absolute -right-4 top-8 bg-rust text-white rounded-full w-24 h-24 flex flex-col items-center justify-center shadow-lg">
+        <span class="text-2xl font-bold font-serif">5+</span>
+        <span class="text-xs tracking-wide">YEARS</span>
+      </div>
+      <div class="absolute -left-4 bottom-8 bg-charcoal text-white px-5 py-3 rounded-xl shadow-lg">
+        <p class="text-xs text-white/60">보유 아이템</p>
+        <p class="text-xl font-serif font-bold">500<span class="text-rust">+</span></p>
+      </div>
+    </div>
+    <div>
+      <p class="text-rust text-sm tracking-[0.3em] font-medium mb-3 uppercase">Our Story</p>
+      <h2 class="font-serif text-4xl font-bold leading-snug mb-6">
+        제주의 바람처럼,<br/>오래된 것의 아름다움
+      </h2>
+      <p class="text-charcoal/70 leading-relaxed mb-4">
+        RETRO JEJU는 제주 중앙로 골목에 자리잡은 작은 빈티지 셀렉트샵입니다.
+        대표 소이진이 직접 일본·유럽·미국에서 수집한 1970~90년대 의류와 소품을 소개합니다.
+      </p>
+      <p class="text-charcoal/70 leading-relaxed mb-8">
+        패스트패션의 반대편에서, 한 벌 한 벌에 담긴 이야기를 소중히 여깁니다.
+        탐나는 피스를 발견하는 그 설레임을 함께 나누고 싶습니다.
+      </p>
+      <div class="grid grid-cols-3 gap-6 pt-6 border-t border-sand">
+        <div>
+          <p class="font-serif text-3xl font-bold text-rust">500+</p>
+          <p class="text-xs text-charcoal/60 mt-1">빈티지 아이템</p>
+        </div>
+        <div>
+          <p class="font-serif text-3xl font-bold text-rust">12</p>
+          <p class="text-xs text-charcoal/60 mt-1">국가에서 수집</p>
+        </div>
+        <div>
+          <p class="font-serif text-3xl font-bold text-rust">★4.9</p>
+          <p class="text-xs text-charcoal/60 mt-1">고객 만족도</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  function haversineKm(a, b) {
-    const R = 6371;
-    const dLat = (b[0] - a[0]) * Math.PI / 180;
-    const dLon = (b[1] - a[1]) * Math.PI / 180;
-    const sin2 = Math.sin(dLat/2)**2 +
-                 Math.cos(a[0]*Math.PI/180) * Math.cos(b[0]*Math.PI/180) *
-                 Math.sin(dLon/2)**2;
-    return (R * 2 * Math.asin(Math.sqrt(sin2))).toFixed(2);
-  }
+  <!-- COLLECTION -->
+  <section id="items" class="bg-sand py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex items-end justify-between mb-12">
+        <div>
+          <p class="text-rust text-sm tracking-[0.3em] font-medium mb-2 uppercase">Collection</p>
+          <h2 class="font-serif text-4xl font-bold">지금 입고된 피스</h2>
+        </div>
+        <a href="#contact" class="hidden md:block text-sm font-medium underline underline-offset-4 hover:text-rust transition-colors">
+          전체 문의하기 →
+        </a>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
 
-  // 마커 추가
-  Object.values(places).forEach(p => {
-    L.marker(p.latlng, { icon: makeIcon(p.color, p.emoji) })
-      .addTo(map)
-      .bindPopup(`<b>${p.label}</b><br>${p.latlng[0].toFixed(4)}°N, ${p.latlng[1].toFixed(4)}°E`, { maxWidth: 200 });
-  });
+        <!-- 아이템 1 -->
+        <div class="group bg-cream rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+          <div class="relative overflow-hidden aspect-[3/4]">
+            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&auto=format&fit=crop&q=80"
+                 alt="빈티지 자켓" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 left-3 bg-rust text-white text-xs px-2 py-1 rounded-full">NEW</span>
+          </div>
+          <div class="p-4">
+            <p class="text-xs text-charcoal/50 mb-1">1980s · USA</p>
+            <p class="font-serif font-bold mb-2">Levi's Trucker Jacket</p>
+            <p class="text-rust font-bold">₩ 98,000</p>
+          </div>
+        </div>
 
-  // 직선 + 거리 라벨
-  const lines = [
-    { from: 'airport', to: 'government', color: '#e67e22' },
-    { from: 'airport', to: 'university', color: '#8e44ad' },
-    { from: 'government', to: 'university', color: '#16a085' }
-  ];
+        <!-- 아이템 2 -->
+        <div class="group bg-cream rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+          <div class="relative overflow-hidden aspect-[3/4]">
+            <img src="https://images.unsplash.com/photo-1559563458-527698bf5295?w=400&auto=format&fit=crop&q=80"
+                 alt="빈티지 니트" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          </div>
+          <div class="p-4">
+            <p class="text-xs text-charcoal/50 mb-1">1970s · France</p>
+            <p class="font-serif font-bold mb-2">Wool Knit Cardigan</p>
+            <p class="text-rust font-bold">₩ 64,000</p>
+          </div>
+        </div>
 
-  lines.forEach(({ from, to, color }) => {
-    const a = places[from].latlng;
-    const b = places[to].latlng;
-    const km = haversineKm(a, b);
+        <!-- 아이템 3 -->
+        <div class="group bg-cream rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+          <div class="relative overflow-hidden aspect-[3/4]">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80"
+                 alt="빈티지 스니커즈" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 left-3 bg-olive text-white text-xs px-2 py-1 rounded-full">SOLD OUT</span>
+          </div>
+          <div class="p-4">
+            <p class="text-xs text-charcoal/50 mb-1">1990s · Japan</p>
+            <p class="font-serif font-bold mb-2">Deadstock Sneakers</p>
+            <p class="text-charcoal/40 font-bold line-through">₩ 145,000</p>
+          </div>
+        </div>
 
-    L.polyline([a, b], {
-      color,
-      weight: 2.5,
-      dashArray: '8 5',
-      opacity: 0.85
-    }).addTo(map);
+        <!-- 아이템 4 -->
+        <div class="group bg-cream rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+          <div class="relative overflow-hidden aspect-[3/4]">
+            <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&auto=format&fit=crop&q=80"
+                 alt="빈티지 원피스" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <span class="absolute top-3 left-3 bg-rust text-white text-xs px-2 py-1 rounded-full">NEW</span>
+          </div>
+          <div class="p-4">
+            <p class="text-xs text-charcoal/50 mb-1">1980s · Italy</p>
+            <p class="font-serif font-bold mb-2">Floral Midi Dress</p>
+            <p class="text-rust font-bold">₩ 82,000</p>
+          </div>
+        </div>
 
-    // 중간 지점에 거리 라벨
-    const mid = [(a[0]+b[0])/2, (a[1]+b[1])/2];
-    L.marker(mid, {
-      icon: L.divIcon({
-        className: '',
-        html: `<div style="
-          background:${color};
-          color:white;
-          padding:3px 7px;
-          border-radius:12px;
-          font-size:11px;
-          font-weight:bold;
-          white-space:nowrap;
-          box-shadow:0 1px 4px rgba(0,0,0,0.3);
-        ">${km} km</div>`,
-        iconAnchor: [25, 10]
-      }),
-      interactive: false
-    }).addTo(map);
-  });
-</script>
+      </div>
+
+      <!-- 카테고리 태그 -->
+      <div class="flex flex-wrap gap-3 mt-10 justify-center">
+        <span class="bg-white border border-charcoal/20 px-5 py-2 rounded-full text-sm hover:bg-rust hover:text-white hover:border-rust transition-colors cursor-pointer">자켓 · 아우터</span>
+        <span class="bg-white border border-charcoal/20 px-5 py-2 rounded-full text-sm hover:bg-rust hover:text-white hover:border-rust transition-colors cursor-pointer">니트 · 스웨터</span>
+        <span class="bg-white border border-charcoal/20 px-5 py-2 rounded-full text-sm hover:bg-rust hover:text-white hover:border-rust transition-colors cursor-pointer">데님</span>
+        <span class="bg-white border border-charcoal/20 px-5 py-2 rounded-full text-sm hover:bg-rust hover:text-white hover:border-rust transition-colors cursor-pointer">원피스 · 스커트</span>
+        <span class="bg-white border border-charcoal/20 px-5 py-2 rounded-full text-sm hover:bg-rust hover:text-white hover:border-rust transition-colors cursor-pointer">신발 · 액세서리</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY VINTAGE -->
+  <section class="max-w-6xl mx-auto px-6 py-24">
+    <div class="text-center mb-16">
+      <p class="text-rust text-sm tracking-[0.3em] font-medium mb-3 uppercase">Why Vintage?</p>
+      <h2 class="font-serif text-4xl font-bold">빈티지를 선택해야 하는 이유</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="text-center p-8 rounded-2xl bg-sand hover:bg-rust hover:text-white transition-colors group">
+        <div class="text-4xl mb-4">🌿</div>
+        <h3 class="font-serif text-xl font-bold mb-3">지속 가능한 패션</h3>
+        <p class="text-sm leading-relaxed text-charcoal/70 group-hover:text-white/80">
+          새 옷을 만들지 않아도 됩니다. 이미 있는 옷에 새 생명을 불어넣는 것, 그것이 진정한 친환경입니다.
+        </p>
+      </div>
+      <div class="text-center p-8 rounded-2xl bg-sand hover:bg-rust hover:text-white transition-colors group">
+        <div class="text-4xl mb-4">✂️</div>
+        <h3 class="font-serif text-xl font-bold mb-3">압도적인 품질</h3>
+        <p class="text-sm leading-relaxed text-charcoal/70 group-hover:text-white/80">
+          수십 년을 버텨온 원단과 봉제. 지금의 패스트패션이 흉내 낼 수 없는 내구성과 질감을 만끽하세요.
+        </p>
+      </div>
+      <div class="text-center p-8 rounded-2xl bg-sand hover:bg-rust hover:text-white transition-colors group">
+        <div class="text-4xl mb-4">🎭</div>
+        <h3 class="font-serif text-xl font-bold mb-3">나만의 스타일</h3>
+        <p class="text-sm leading-relaxed text-charcoal/70 group-hover:text-white/80">
+          세상에 단 하나뿐인 아이템. 누구와도 겹치지 않는 나만의 옷장을 만들어보세요.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section class="bg-charcoal text-white py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <p class="text-rust text-sm tracking-[0.3em] font-medium mb-3 uppercase text-center">Reviews</p>
+      <h2 class="font-serif text-4xl font-bold text-center mb-14">손님들의 이야기</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div class="flex gap-1 mb-4 text-rust">★★★★★</div>
+          <p class="text-white/80 text-sm leading-relaxed mb-6">
+            "제주 여행 중 우연히 들렀다가 완전히 반해버렸어요. 큐레이션이 정말 탁월하고, 사장님이 각 아이템에 대한 이야기를 해주셔서 더 의미 있게 느껴졌습니다."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-rust/30 flex items-center justify-center text-sm font-bold">김</div>
+            <div>
+              <p class="text-sm font-medium">김지원</p>
+              <p class="text-xs text-white/40">서울 · 2024.11</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div class="flex gap-1 mb-4 text-rust">★★★★★</div>
+          <p class="text-white/80 text-sm leading-relaxed mb-6">
+            "빈티지 샵 많이 다녀봤지만 여기처럼 컨디션이 좋고 가격도 합리적인 곳은 처음이에요. 1980년대 리바이스 자켓 득템했습니다!"
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-olive/40 flex items-center justify-center text-sm font-bold">박</div>
+            <div>
+              <p class="text-sm font-medium">박민준</p>
+              <p class="text-xs text-white/40">부산 · 2024.09</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div class="flex gap-1 mb-4 text-rust">★★★★★</div>
+          <p class="text-white/80 text-sm leading-relaxed mb-6">
+            "제주 중앙로에 이런 보석 같은 샵이 있다니! 골목 분위기랑 너무 잘 어울리고, 직접 입어볼 수 있게 공간도 여유 있게 꾸며져 있어서 좋았어요."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-sand/20 flex items-center justify-center text-sm font-bold">이</div>
+            <div>
+              <p class="text-sm font-medium">이하늘</p>
+              <p class="text-xs text-white/40">제주 · 2024.12</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION -->
+  <section id="location" class="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
+    <div>
+      <p class="text-rust text-sm tracking-[0.3em] font-medium mb-3 uppercase">Location</p>
+      <h2 class="font-serif text-4xl font-bold mb-6">찾아오시는 길</h2>
+      <div class="space-y-5 text-charcoal/80">
+        <div class="flex gap-4">
+          <span class="text-rust mt-1">📍</span>
+          <div>
+            <p class="font-medium mb-1">주소</p>
+            <p class="text-sm">제주특별자치도 제주시 중앙로 ○○길 12<br/>(구제주 중앙로 골목, ○○빌딩 1층)</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <span class="text-rust mt-1">🕐</span>
+          <div>
+            <p class="font-medium mb-1">운영시간</p>
+            <p class="text-sm">화–일 &nbsp;12:00 – 19:00<br/><span class="text-charcoal/40">월요일 정기휴무</span></p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <span class="text-rust mt-1">🚌</span>
+          <div>
+            <p class="font-medium mb-1">대중교통</p>
+            <p class="text-sm">제주시청 버스정류장에서 도보 5분<br/>중앙로 방면 골목 진입 후 왼쪽</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <span class="text-rust mt-1">🅿️</span>
+          <div>
+            <p class="font-medium mb-1">주차</p>
+            <p class="text-sm">인근 제주시청 공영주차장 이용<br/>(도보 3분)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 지도 placeholder -->
+    <div class="relative rounded-2xl overflow-hidden shadow-xl">
+      <img src="https://images.unsplash.com/photo-1524813686514-a57563d77965?w=700&auto=format&fit=crop&q=80"
+           alt="제주 골목 거리" class="w-full h-[400px] object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-charcoal/60 to-transparent flex items-end p-6">
+        <div class="text-white">
+          <p class="font-serif text-xl font-bold mb-1">RETRO JEJU</p>
+          <p class="text-sm text-white/70">제주시 중앙로 골목</p>
+        </div>
+      </div>
+      <!-- 위치 핀 -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div class="w-10 h-10 bg-rust rounded-full border-4 border-white shadow-lg flex items-center justify-center animate-bounce">
+          <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / CTA -->
+  <section id="contact" class="bg-rust text-white py-24">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+      <p class="text-white/60 text-sm tracking-[0.3em] font-medium mb-4 uppercase">Contact</p>
+      <h2 class="font-serif text-4xl md:text-5xl font-bold mb-6 leading-tight">
+        방문 전에<br/>미리 문의해보세요
+      </h2>
+      <p class="text-white/80 mb-10 leading-relaxed">
+        원하는 사이즈·스타일이 있으시면 인스타그램 DM 또는 카카오톡으로 문의 주세요.
+        방문 예약 시 원하는 아이템을 미리 준비해드립니다.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="https://instagram.com" target="_blank"
+           class="flex items-center justify-center gap-2 bg-white text-rust px-8 py-4 rounded-full font-bold hover:bg-cream transition-colors">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+          Instagram DM
+        </a>
+        <a href="https://pf.kakao.com" target="_blank"
+           class="flex items-center justify-center gap-2 bg-charcoal text-white px-8 py-4 rounded-full font-bold hover:bg-black transition-colors">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 3C6.477 3 2 6.701 2 11.245c0 2.91 1.82 5.47 4.572 6.978l-.928 3.462 4.007-2.642C10.5 19.346 11.24 19.49 12 19.49c5.523 0 10-3.701 10-8.245C22 6.701 17.523 3 12 3z"/>
+          </svg>
+          카카오톡 채널
+        </a>
+      </div>
+      <p class="mt-8 text-white/50 text-sm">
+        📞 010-0000-0000 &nbsp;|&nbsp; 화–일 12:00–19:00
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-charcoal text-white/40 py-10">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+      <p class="font-serif text-white/70 text-lg font-bold tracking-widest">
+        RETRO<span class="text-rust">JEJU</span>
+      </p>
+      <p>제주특별자치도 제주시 중앙로 · 사업자등록번호 000-00-00000</p>
+      <p>© 2024 RETRO JEJU. All rights reserved.</p>
+    </div>
+  </footer>
+
 </body>
 </html>
